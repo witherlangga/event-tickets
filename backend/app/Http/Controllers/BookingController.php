@@ -16,6 +16,24 @@ use App\Helpers\LogHelper;
 
 class BookingController extends Controller
 {
+    // Tiket milik user (vault)
+    public function myTickets(Request $request)
+    {
+        $user = $request->user();
+        $tickets = $user->tickets()->with(['category.event', 'category'])->get();
+        return response()->json(['data' => $tickets]);
+    }
+
+    // Detail tiket tertentu
+    public function ticketDetail(Request $request, $id)
+    {
+        $user = $request->user();
+        $ticket = $user->tickets()->with(['event', 'category'])->find($id);
+        if (!$ticket) {
+            return response()->json(['message' => 'Tiket tidak ditemukan'], 404);
+        }
+        return response()->json(['data' => $ticket]);
+    }
     public function book(Request $request)
     {
         $validator = Validator::make($request->all(), [

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'event/list/event_list_page.dart';
-import 'ticket/vault/ticket_vault_page.dart';
-import 'profile/view/profile_page.dart';
+import 'booking/my_tickets_page.dart';
+import 'profile/profile_page.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -14,7 +14,7 @@ class _MainNavigationState extends State<MainNavigation> {
   int _selectedIndex = 0;
   final List<Widget> _pages = const [
     EventListPage(),
-    TicketVaultPage(),
+    MyTicketsPage(),
     ProfilePage(),
   ];
 

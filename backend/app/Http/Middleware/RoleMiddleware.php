@@ -9,16 +9,17 @@ class RoleMiddleware
 {
     /**
      * Handle an incoming request.
+     * Usage in routes: ->middleware('role:organizer') or ->middleware('role:admin,organizer')
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     * @param  string|array  $roles
+     * @param  mixed  ...$roles
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
         $user = $request->user();
-        if (!$user || !in_array($user->role, $roles)) {
+        if (!$user || empty($roles) || !in_array($user->role, $roles)) {
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
         return $next($request);

@@ -4,10 +4,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Ticket extends Model
 {
     use HasFactory, SoftDeletes;
+    protected $appends = ['qr_image_url'];
     protected $fillable = [
         'ticket_category_id',
         'user_id',
@@ -29,5 +31,14 @@ class Ticket extends Model
     public function checkIn()
     {
         return $this->hasOne(CheckIn::class);
+    }
+
+    public function getQrImageUrlAttribute()
+    {
+        $path = 'qrcodes/' . $this->id . '.png';
+        if (Storage::disk('public')->exists($path)) {
+            return Storage::url($path);
+        }
+        return null;
     }
 }

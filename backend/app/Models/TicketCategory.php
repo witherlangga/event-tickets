@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class TicketCategory extends Model
 {
     use HasFactory, SoftDeletes;
+
     protected $fillable = [
         'event_id',
         'name',

@@ -2,75 +2,109 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\Organizer;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use App\Helpers\LogHelper;
 
 class EventController extends Controller
 {
-    // List event (semua role)
-    public function index(Request $request)
+    public function index()
     {
-        $events = Event::with('ticketCategories')->get();
-        return response()->json($events);
+        // Hanya tampilkan event yang statusnya 'published' di dashboard publik
+        $events = Event::with('organizer')
+            ->where('status', 'published')
+            ->latest()
+            ->get();
+        return response()->json(['events' => $events]);
     }
 
-    // Buat event (organizer)
+    public function show($id)
+    {
+        $event = Event::with('ticketCategories')->findOrFail($id);
+        return response()->json(['event' => $event]);
+    }
+
+    // Events belonging to authenticated organizer
+    public function organizerIndex(Request $request)
+    {
+        $user = $request->user();
+        $organizer = Organizer::where('user_id', $user->id)->firstOrFail();
+        $events = Event::where('organizer_id', $organizer->id)->with('ticketCategories')->get();
+        return response()->json(['events' => $events]);
+    }
+
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'title' => 'required|string',
-            'description' => 'required|string',
-            'location' => 'required|string',
+        $user = $request->user();
+        $organizer = Organizer::where('user_id', $user->id)->firstOrFail();
+
+        $data = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'location' => 'nullable|string',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
             'start_time' => 'required|date',
             'end_time' => 'required|date|after_or_equal:start_time',
-            'banner' => 'nullable|string',
+            'banner' => 'nullable|image|max:4096',
+            'status' => 'nullable|in:draft,published,cancelled',
         ]);
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+
+        if ($request->hasFile('banner')) {
+            $path = $request->file('banner')->store('banners', 'public');
+            $data['banner'] = $path;
         }
-        $organizer = $request->user()->organizer;
-        $event = Event::create(array_merge($validator->validated(), [
-            'organizer_id' => $organizer->id,
-            'status' => 'draft',
-        ]));
-        LogHelper::log($request->user()->id, 'event_create', 'Membuat event #' . $event->id);
-        return response()->json($event, 201);
+
+        $data['organizer_id'] = $organizer->id;
+        $data['status'] = $data['status'] ?? 'draft';
+
+        $event = Event::create($data);
+
+        return response()->json(['event' => $event], 201);
     }
 
-    // Update event (organizer)
     public function update(Request $request, $id)
     {
-        $event = Event::findOrFail($id);
-        $this->authorize('update', $event); // Policy bisa ditambah
-        $validator = Validator::make($request->all(), [
-            'title' => 'sometimes|string',
-            'description' => 'sometimes|string',
-            'location' => 'sometimes|string',
+        $user = $request->user();
+        $organizer = Organizer::where('user_id', $user->id)->firstOrFail();
+        $event = Event::where('organizer_id', $organizer->id)->findOrFail($id);
+
+        $data = $request->validate([
+            'title' => 'sometimes|string|max:255',
+            'description' => 'nullable|string',
+            'location' => 'nullable|string',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
-            'start_time' => 'sometimes|date',
-            'end_time' => 'sometimes|date|after_or_equal:start_time',
-            'banner' => 'nullable|string',
-            'status' => 'sometimes|in:draft,published,cancelled',
+            'start_time' => 'nullable|date',
+            'end_time' => 'nullable|date',
+            'banner' => 'nullable|image|max:4096',
+            'status' => 'nullable|in:draft,published,cancelled',
         ]);
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+
+        if ($request->hasFile('banner')) {
+            $path = $request->file('banner')->store('banners', 'public');
+            $data['banner'] = $path;
         }
-        $event->update($validator->validated());
-        LogHelper::log($request->user()->id, 'event_update', 'Update event #' . $event->id);
-        return response()->json($event);
+
+        $event->update($data);
+        return response()->json(['event' => $event]);
     }
 
-    // Hapus event (organizer)
     public function destroy(Request $request, $id)
     {
-        $event = Event::findOrFail($id);
-        $this->authorize('delete', $event); // Policy bisa ditambah
+        $user = $request->user();
+        $organizer = Organizer::where('user_id', $user->id)->firstOrFail();
+        $event = Event::where('organizer_id', $organizer->id)->findOrFail($id);
         $event->delete();
-        LogHelper::log($request->user()->id, 'event_delete', 'Hapus event #' . $id);
         return response()->json(['message' => 'Event deleted']);
+    }
+
+    public function publish(Request $request, $id)
+    {
+        $user = $request->user();
+        $organizer = Organizer::where('user_id', $user->id)->firstOrFail();
+        $event = Event::where('organizer_id', $organizer->id)->findOrFail($id);
+        $event->status = 'published';
+        $event->save();
+        return response()->json(['event' => $event]);
     }
 }

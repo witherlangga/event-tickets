@@ -16,6 +16,9 @@ class Transaction extends Model
         'payment_gateway',
         'payment_reference',
         'paid_at',
+        'proof_path',
+        'approved_at',
+        'approved_by',
     ];
 
     public function user()
@@ -31,5 +34,15 @@ class Transaction extends Model
     public function details()
     {
         return $this->hasMany(TransactionDetail::class);
+    }
+
+    public function approver()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function tickets()
+    {
+        return $this->hasManyThrough(\App\Models\Ticket::class, TransactionDetail::class, 'transaction_id', 'id', 'id', 'ticket_id');
     }
 }

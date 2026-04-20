@@ -21,6 +21,8 @@ class Event extends Model
         'status',
     ];
 
+    protected $appends = ['banner_url'];
+
     public function organizer()
     {
         return $this->belongsTo(Organizer::class);
@@ -34,5 +36,13 @@ class Event extends Model
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function getBannerUrlAttribute()
+    {
+        if (!$this->banner) {
+            return null;
+        }
+        return url('storage/' . $this->banner);
     }
 }

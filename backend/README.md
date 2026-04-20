@@ -56,3 +56,37 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Storage / Banner Upload
+
+To serve uploaded banners make sure the public storage link exists:
+
+```bash
+php artisan storage:link
+```
+
+Example `curl` to create an event with banner (organizer):
+
+```bash
+curl -X POST "http://localhost/api/organizer/events" \
+	-H "Authorization: Bearer <TOKEN>" \
+	-F "title=My Event" \
+	-F "description=Description here" \
+	-F "location=City" \
+	-F "start_time=2026-05-01 10:00:00" \
+	-F "end_time=2026-05-01 18:00:00" \
+	-F "banner=@/path/to/banner.jpg"
+```
+
+The API stores banners under the `storage/app/public/banners` folder and `Event` exposes `banner_url` in responses.
+
+Image resizing/optimisasi
+
+Paket `intervention/image` digunakan untuk meresize dan mengoptimalkan banner saat diupload. Install package dengan:
+
+```bash
+cd backend
+composer require intervention/image
+```
+
+Pastikan ekstensi GD atau Imagick terpasang pada PHP agar package dapat bekerja.
