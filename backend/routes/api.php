@@ -1,7 +1,14 @@
+
 <?php
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\TicketCategoryController;
+use App\Http\Controllers\BookingController;
+use App\Http\Controllers\CheckInController;
+use App\Http\Controllers\TransactionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,32 +43,32 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 // AUTH
-Route::post('/login', [\App\Http\Controllers\AuthController::class, 'login']);
-Route::post('/register', [\App\Http\Controllers\AuthController::class, 'register']);
-Route::middleware('auth:sanctum')->post('/logout', [\App\Http\Controllers\AuthController::class, 'logout']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
+Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
 
 // EVENT
-Route::get('/events', [\App\Http\Controllers\EventController::class, 'index']);
-Route::get('/events/{id}', [\App\Http\Controllers\EventController::class, 'show']);
+Route::get('/events', [EventController::class, 'index']);
+Route::get('/events/{id}', [EventController::class, 'show']);
 
 // TICKET CATEGORY
-Route::get('/events/{event_id}/ticket-categories', [\App\Http\Controllers\TicketCategoryController::class, 'index']);
+Route::get('/events/{event_id}/ticket-categories', [TicketCategoryController::class, 'index']);
 
 // BOOKING
-Route::middleware(['auth:sanctum', 'role:customer'])->post('/book', [\App\Http\Controllers\BookingController::class, 'book']);
-Route::middleware('auth:sanctum')->get('/my-tickets', [\App\Http\Controllers\BookingController::class, 'myTickets']);
-Route::middleware('auth:sanctum')->get('/my-tickets/{id}', [\App\Http\Controllers\BookingController::class, 'ticketDetail']);
+Route::middleware(['auth:sanctum', 'role:customer'])->post('/book', [BookingController::class, 'book']);
+Route::middleware('auth:sanctum')->get('/my-tickets', [BookingController::class, 'myTickets']);
+Route::middleware('auth:sanctum')->get('/my-tickets/{id}', [BookingController::class, 'ticketDetail']);
 
 // CHECK-IN
-Route::middleware('auth:sanctum')->post('/check-in', [\App\Http\Controllers\CheckInController::class, 'scan']);
+Route::middleware('auth:sanctum')->post('/check-in', [CheckInController::class, 'scan']);
 
 // TRANSACTION
-Route::middleware('auth:sanctum')->get('/transactions', [\App\Http\Controllers\TransactionController::class, 'index']);
-Route::middleware('auth:sanctum')->get('/transactions/{id}', [\App\Http\Controllers\TransactionController::class, 'show']);
+Route::middleware('auth:sanctum')->get('/transactions', [TransactionController::class, 'index']);
+Route::middleware('auth:sanctum')->get('/transactions/{id}', [TransactionController::class, 'show']);
 
 // PROFILE
-Route::middleware('auth:sanctum')->get('/profile', [\App\Http\Controllers\AuthController::class, 'profile']);
-Route::middleware('auth:sanctum')->put('/profile', [\App\Http\Controllers\AuthController::class, 'updateProfile']);
+Route::middleware('auth:sanctum')->get('/profile', [AuthController::class, 'profile']);
+Route::middleware('auth:sanctum')->put('/profile', [AuthController::class, 'updateProfile']);
 
 // TEST ROUTE
 Route::get('/test', function () {

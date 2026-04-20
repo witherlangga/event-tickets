@@ -1,28 +1,13 @@
-                    '/transaction-detail': (context) {
-                      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-                      return TransactionDetailPage(
-                        id: args?['id'] ?? '-',
-                        event: args?['event'] ?? '-',
-                        date: args?['date'] ?? '-',
-                        total: args?['total'] ?? 0,
-                      );
-                    },
-            '/qr-scanner': (context) => const QrScannerPage(),
-          '/profile-edit': (context) => const ProfileEditPage(),
-        '/ticket-detail': (context) {
-          final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-          return TicketDetailPage(
-            event: args?['event'] ?? '-',
-            date: args?['date'] ?? '-',
-            code: args?['code'] ?? '-',
-          );
-        },
 import 'package:flutter/material.dart';
 import 'auth/login/login_page.dart';
 import 'auth/register/register_page.dart';
 import 'event/list/event_list_page.dart';
 import 'event/detail/event_detail_page.dart';
 import 'main_navigation.dart';
+import 'transaction/detail/transaction_detail_page.dart';
+import 'ticket/checkin/qr_scanner_page.dart';
+import 'profile/edit/profile_edit_page.dart';
+import 'ticket/vault/ticket_detail_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -49,6 +34,25 @@ class MyApp extends StatelessWidget {
           return EventDetailPage(
             eventTitle: args?['eventTitle'] ?? 'Event',
             eventDate: args?['eventDate'] ?? '2026-01-01',
+          );
+        },
+        '/transaction-detail': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+          return TransactionDetailPage(
+            id: args?['id'] ?? '-',
+            event: args?['event'] ?? '-',
+            date: args?['date'] ?? '-',
+            total: args?['total'] ?? 0,
+          );
+        },
+        '/qr-scanner': (context) => const QrScannerPage(),
+        '/profile-edit': (context) => const ProfileEditPage(),
+        '/ticket-detail': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+          return TicketDetailPage(
+            event: args?['event'] ?? '-',
+            date: args?['date'] ?? '-',
+            code: args?['code'] ?? '-',
           );
         },
       },
